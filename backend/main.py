@@ -13,7 +13,20 @@ DB_USER = os.getenv("DB_USER", "appuser")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "apppass")
 DB_NAME = os.getenv("DB_NAME", "tienda")
 
-DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:3306/{DB_NAME}"
+from sqlalchemy.engine import URL
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    DATABASE_URL = URL.create(
+        drivername="mysql+pymysql",
+        username=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=3306,
+        database=DB_NAME,
+    )
+
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
 # Por las dudas, reintenta hasta que la base responda
@@ -46,6 +59,14 @@ class Usuario(BaseModel):
 @app.get("/")
 def estado():
     return {"mensaje": "API funcionando"}
+
+@app.get("/health")
+def health():
+    return {
+        "status": "ok",
+        "service": "backend-actividad7",
+        "environment": os.getenv("ENVIRONMENT", "development")
+    }
 
 @app.get("/usuarios", response_model=List[Usuario])
 def listar_usuarios():
