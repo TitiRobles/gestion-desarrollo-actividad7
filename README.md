@@ -1,89 +1,70 @@
-# TP Docker - ACTIVIDAD 2 
+# Actividad 7 — Despliegue continuo y observabilidad
 
-Aplicación web full-stack con 3 contenedores Docker:
-MySQL (base de datos), FastAPI (backend) y Nginx (frontend),
-conectados por una red bridge propia llamada `red-tienda`.
+Es una aplicacion web que muestra un saludo personalizado y una lista de usuarios guardados en MySQL. El frontend consulta una API FastAPI y muestra los datos recibidos.
 
-La web muestra un mensaje de bienvenida con el `nombre`
-del usuario 1 de la tabla `usuarios`.
+El proyecto parte de la **Actividad 2** y fue adaptado para funcionar en la nube, con despliegue automático y monitoreo de errores.
 
-## Estructura de carpetas
+**Integrantes:** Tiago Robles, Joaquín Paramo, Juan Pablo Mora y Rodrigo.
 
-```
-tienda-docker/
-├── docker-compose.yml   # los 3 servicios, la red y el volumen
-├── .env.example         # plantilla de variables de entorno
-├── .gitignore           # evita subir el .env con las claves reales
-├── README.md            # este archivo
-├── db/
-│   └── init.sql         # crea la tabla usuarios y carga datos
-├── backend/
-│   ├── Dockerfile       # imagen de FastAPI (python:3.11-slim)
-│   ├── requirements.txt # dependencias de Python
-│   └── main.py          # la API
-└── frontend/
-    ├── Dockerfile       # imagen de Nginx
-    ├── nginx.conf       # sirve la web + proxy y CORS hacia la API
-    ├── index.html
-    ├── styles.css
-    └── app.js           # fetch() a la API
-```
+## Tecnologías utilizadas
 
-## Cómo levantar el entorno
+- **Frontend:** HTML, CSS y JavaScript, publicado en **Netlify**.
+- **Backend:** Python y **FastAPI**, ejecutado con **Docker** en **Render**.
+- **Base de datos:** **MySQL** alojada en **Aiven**, conectada mediante SQLAlchemy y PyMySQL.
+- **Repositorio y despliegues:** GitHub (`main`), conectado a Netlify y Render.
+- **Observabilidad:** **Sentry** para registrar errores y ver su stack trace.
 
-1. Tener Docker Desktop instalado y abierto.
-2. Crear el archivo `.env` a partir de la plantilla:
-   - Windows: `copy .env.example .env`
-   - Linux / Mac: `cp .env.example .env`
-3. Levantar todo con un solo comando:
+## Enlaces para probar el funcionamiento
 
-```
+- **Web:** https://prismatic-kangaroo-67af2c.netlify.app
+- **API:** https://gestion-desarrollo-actividad7-api.onrender.com
+- **Documentación de FastAPI:** https://gestion-desarrollo-actividad7-api.onrender.com/docs
+- **Usuarios:** https://gestion-desarrollo-actividad7-api.onrender.com/usuarios
+- **Estado del backend:** https://gestion-desarrollo-actividad7-api.onrender.com/health
+- **Sentry (requiere acceso):** https://gestion-desarrollo-actividad7.sentry.io
+
+
+## Pruebas de la app
+
+1. Abrir la **web de Netlify**. Debe aparecer el saludo **«¡Bienvenido/a, Tiago!»** y la lista de los cuatro integrantes.
+2. Presionar **Recargar**: la página vuelve a consultar la API y muestra los usuarios de MySQL.
+3. Abrir **`/usuarios`** en Render: debe devolver los usuarios en formato JSON.
+4. Abrir **`/health`**: debe devolver `"status": "ok"`, `"environment": "production"` y la versión `"1.1.0"`.
+5. Entrar a **`/docs`** para consultar y probar los endpoints desde Swagger.
+
+## Cómo comprobar el correcto despliegue automático
+
+El frontend y el backend están conectados a la rama `main` de este repositorio.
+
+1. Modificar un texto de `frontend/index.html`, hacer commit y ejecutar `git push origin main`.
+2. Revisar **Deploys** en Netlify: debe generarse un despliegue automático y reflejarse el cambio en la web.
+3. Modificar la respuesta de `/health` en `backend/main.py`, hacer commit y ejecutar `git push origin main`.
+4. Revisar **Deploys** en Render: debe aparecer un despliegue con el origen **Auto-Deploy**. Al finalizar, consultar `/health` para ver el cambio.
+
+Estas pruebas ya las realizamos: Netlify publicó el cambio de titulo y Render publicó la versión `1.1.0` del backend.
+
+## Cómo comprobar Sentry
+
+Se integró Sentry en FastAPI y se realizó una prueba con el endpoint `/test-sentry`. El panel registró una excepción **`ZeroDivisionError`**, mostrando el archivo `main.py`, la función `test_sentry` y la línea que produjo el error.
+
+Para revisar esto, ingresar al panel de **Sentry → Issues** con una cuenta autorizada y abrir el evento registrado.
+
+## Ejecución local (opcional)
+
+El proyecto conserva la configuración Docker Compose de la Actividad 2. Para levantarla localmente:
+
+1. Tener Docker Desktop abierto.
+2. Crear `.env` a partir de `.env.example` y completar las variables requeridas.
+3. Ejecutar:
+
+```bash
 docker compose up --build
 ```
 
-## Dónde ver cada parte
+**Nota:** `frontend/app.js` apunta actualmente al backend de Render. Para probar todo de manera local, cambiar esa URL por la dirección del backend local.
 
-- Web: http://localhost:8080
-- API: http://localhost:8000 (documentación en http://localhost:8000/docs)
-- Consola de MySQL: `docker exec -it tienda-db mysql -u root -p`
+Para detener los contenedores:
 
-## Endpoints de la API
-
-- `GET /usuarios` devuelve todos los usuarios
-- `GET /usuarios/{id}` devuelve un usuario (la web usa el 1)
-
-## Apagar
-
-- `docker compose down` apaga y conserva los datos
-- `docker compose down -v` apaga y borra los datos
-
-## Demo: consultar y modificar la base
-
-1. Entrar a la consola de MySQL (la clave está en el `.env`):
-
-```
-docker exec -it tienda-db mysql -u root -p
-```
-
-2. Consultar la tabla:
-
-```sql
-USE tienda;
-SHOW TABLES;
-SELECT * FROM usuarios;
-```
-
-3. Modificar un registro:
-
-```sql
-UPDATE usuarios SET nombre = 'Profe' WHERE id = 1;
-```
-
-4. Recargar http://localhost:8080: la web dice "¡Bienvenido/a, Profe!".
-
-5. Para volver a los datos iniciales:
-
-```
-docker compose down -v
-docker compose up --build
+```bash
+docker compose down
 ```
