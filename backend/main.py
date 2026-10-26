@@ -3,6 +3,7 @@ import os
 import time
 import logging
 from typing import List
+import sentry_sdk
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -83,6 +84,16 @@ def verificar_conexion():
 
 verificar_conexion()
 
+# CONFIGURACIÓN DE SENTRY
+
+if os.getenv("SENTRY_DSN"):
+    sentry_sdk.init(
+        dsn=os.getenv("SENTRY_DSN"),
+        environment=os.getenv("ENVIRONMENT", "development"),
+        traces_sample_rate=0.1,
+        enable_logs=True,
+        send_default_pii=False,
+    )
 
 # INICIALIZACIÓN DE FASTAPI
 
@@ -190,3 +201,14 @@ def obtener_usuario(usuario_id: int):
             status_code=503,
             detail="Error de conexión con la base de datos"
         )
+
+@app.get("/test-sentry")
+def test_sentry():
+    if os.getenv("ENABLE_SENTRY_TEST", "false").lower() != "true":
+        raise HTTPException(
+            status_code=404,
+            detail="Not Found"
+        )
+
+    division_por_cero = 1 / 0
+    return {"resultado": division_por_cero}
