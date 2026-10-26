@@ -135,16 +135,17 @@ def estado():
 
 
 
+
 @app.get("/health")
 def health():
     return {
         "status": "ok",
         "service": "backend-actividad7",
-        "environment": os.getenv(
-            "ENVIRONMENT",
-            "development"
-        )
+        "environment": os.getenv("ENVIRONMENT", "development"),
+        "version": "1.1.0",
+        "deployment": "automatico-desde-github"
     }
+
 
 
 @app.get("/usuarios", response_model=List[Usuario])
