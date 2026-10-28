@@ -4,7 +4,7 @@ Es una aplicacion web que muestra un saludo personalizado y una lista de usuario
 
 El proyecto parte de la **Actividad 2** y fue adaptado para funcionar en la nube, con despliegue automático y monitoreo de errores.
 
-**Integrantes:** Tiago Robles, Joaquín Paramo, Juan Pablo Mora y Rodrigo.
+**Integrantes:** Tiago Robles, Joaquín Paramo, Juan Pablo Mora y Rodrigo Córdoba.
 
 ## Tecnologías utilizadas
 
@@ -48,6 +48,14 @@ Estas pruebas ya las realizamos: Netlify publicó el cambio de titulo y Render p
 Se integró Sentry en FastAPI y se realizó una prueba con el endpoint `/test-sentry`. El panel registró una excepción **`ZeroDivisionError`**, mostrando el archivo `main.py`, la función `test_sentry` y la línea que produjo el error.
 
 Para revisar esto, ingresar al panel de **Sentry → Issues** con una cuenta autorizada y abrir el evento registrado.
+
+### Variables de entorno
+
+El backend utiliza variables de entorno para conectarse a MySQL (Aiven) y configurar el monitoreo de errores con Sentry.
+
+El archivo `backend/.env.example` documenta las variables necesarias sin exponer credenciales.
+
+En producción, estas variables se configuran directamente en **Render → Environment**, evitando almacenar contraseñas y claves privadas en el repositorio.
 
 ## Ejecución local (opcional)
 
