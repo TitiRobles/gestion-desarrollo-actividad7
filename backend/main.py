@@ -129,7 +129,7 @@ class Usuario(BaseModel):
 @app.get("/")
 def estado():
     return {
-        "mensaje": "API Actividad 7 funcionando",
+        "mensaje": "API Actividad 7 funcionando cambio en vivo",
         "estado": "online"
     }
 
